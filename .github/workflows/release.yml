@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc sqlite3 libsqlite3-dev
+
+    - name: Get version
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Build binaries
+      run: |
+        # Linux AMD64
+        CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.version.outputs.VERSION }} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o messagebridge-linux-amd64 .
+        
+        # Create archives
+        chmod +x scripts/*.sh
+        tar -czf messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz messagebridge-linux-amd64 examples/ deployments/ scripts/ README.md QUICKSTART.md LICENSE CHANGELOG.md
+        
+        # Create checksums
+        sha256sum messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz > checksums.txt
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        if [ -f CHANGELOG.md ]; then
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "CHANGELOG=Релиз ${{ steps.version.outputs.VERSION }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        release_name: MessageBridge ${{ steps.version.outputs.VERSION }}
+        body: |
+          ## MessageBridge ${{ steps.version.outputs.VERSION }}
+          
+          ### 📦 Загрузки
+          
+          - **Linux AMD64**: `messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz`
+          
+          ### 🚀 Быстрый запуск
+          
+          ```bash
+          # Скачивание и распаковка
+          wget https://github.com/expai/messagebridge/releases/download/${{ steps.version.outputs.VERSION }}/messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
+          tar -xzf messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
+          cd messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64/
+          
+          # Автоматическая установка (полная с nginx)
+          sudo ./scripts/install.sh
+          
+          # Или минимальная установка
+          sudo ./scripts/install.sh --minimal
+          
+          # Или ручная установка
+          sudo cp messagebridge-linux-amd64 /usr/local/bin/messagebridge
+          sudo chmod +x /usr/local/bin/messagebridge
+          ```
+          
+          ### 📦 Содержимое архива
+          
+          - `messagebridge` - Исполняемый файл
+          - `examples/` - Примеры конфигураций
+          - `scripts/` - Скрипты установки и удаления
+          - `deployments/` - Файлы для systemd
+          - Документация (README, QUICKSTART, LICENSE)
+          
+          ### 🐳 Docker
+          
+          ```bash
+          docker pull expai/messagebridge:${{ steps.version.outputs.VERSION }}
+          ```
+          
+          ${{ steps.changelog.outputs.CHANGELOG }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
+        asset_name: messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload Checksums
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./checksums.txt
+        asset_name: checksums.txt
+        asset_content_type: text/plain 

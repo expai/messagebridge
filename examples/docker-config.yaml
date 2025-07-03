@@ -1,0 +1,33 @@
+# Docker configuration for messagebridge
+# Optimized for containerized environment with Kafka
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+routes:
+  - path: "/webhook/payment"
+    queue: "payment-events"
+  - path: "/webhook/user"
+    queue: "user-events"
+  - path: "/webhook/order"
+    queue: "order-events"
+
+kafka:
+  brokers:
+    - "kafka:29092"
+  # No security for local development
+  retry_max: 3
+  retry_backoff: 2s
+  batch_size: 100
+  timeout: 30s
+
+# SQLite for backup storage
+sqlite:
+  database_path: "/var/lib/messagebridge/messages.db"
+
+# Worker settings
+worker:
+  retry_interval: 1m       # Retry check interval
+  batch_size: 50           # Batch size for database queries (messages sent individually)
+  max_retries: 5           # Maximum retry attempts (0 = unlimited) 

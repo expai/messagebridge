@@ -1,0 +1,62 @@
+[Unit]
+Description=MessageBridge - Secure Payment Webhook Gateway
+Documentation=https://github.com/expai/messagebridge
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=messagebridge
+Group=messagebridge
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/messagebridge /var/log/messagebridge
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+RemoveIPC=true
+PrivateDevices=true
+
+# Environment
+Environment=CONFIG_PATH=/etc/messagebridge/config.yaml
+WorkingDirectory=/var/lib/messagebridge
+
+# Process management
+ExecStart=/usr/local/bin/messagebridge -config ${CONFIG_PATH}
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Restart conditions
+RestartKillSignal=SIGTERM
+RestartPreventExitStatus=0
+
+# Handle exit codes
+# ExitRestart=2 means the application requested a restart
+SuccessExitStatus=0 2
+RestartForceExitStatus=2
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=messagebridge
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target 

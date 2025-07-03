@@ -1,0 +1,52 @@
+# Example configuration for messagebridge
+# This file shows all available configuration options
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+routes:
+  - path: "/webhook/payment"
+    queue: "payment-events"
+  - path: "/webhook/user"
+    queue: "user-events"
+  - path: "/webhook/order"
+    queue: "order-events"
+
+kafka:
+  brokers:
+    - "localhost:9092"
+    - "localhost:9093"
+  # Security settings (optional)
+  security_protocol: "SASL_SSL"  # Options: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+  sasl_mechanism: "SCRAM-SHA-256"  # Options: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+  sasl_username: "your-username"
+  sasl_password: "your-password"
+  tls_enabled: true
+  # Performance settings
+  retry_max: 3
+  retry_backoff: 2s
+  batch_size: 100
+  timeout: 30s
+
+# Optional: Redis for future use
+# redis:
+#   address: "localhost:6379"
+#   password: ""
+#   database: 0
+
+# Optional: SQLite for backup storage
+sqlite:
+  database_path: "/var/lib/messagebridge/messages.db"
+
+# Optional: Remote URL forwarding
+# remote_url:
+#   url: "https://api.example.com/webhooks"
+#   timeout: 30s
+#   retries: 3
+
+# Worker settings
+worker:
+  retry_interval: 5m       # How often to check for failed messages
+  batch_size: 50           # Number of messages to fetch per batch (sent one by one)
+  max_retries: 3           # Max retry attempts (0 = unlimited until successful) 

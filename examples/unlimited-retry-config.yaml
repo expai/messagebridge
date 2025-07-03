@@ -1,0 +1,37 @@
+# Example: Unlimited retry configuration
+# This configuration ensures ALL messages are eventually delivered
+# Perfect for critical payment webhooks that must not be lost
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+routes:
+  - path: "/webhook/payment"
+    queue: "critical-payments"
+  - path: "/webhook/refund"
+    queue: "critical-refunds"
+
+# Primary delivery target
+remote_url:
+  url: "https://api.yourcompany.com/webhooks"
+  timeout: 30s
+  retries: 3
+
+# Backup storage (required when using remote_url)
+sqlite:
+  database_path: "/var/lib/messagebridge/critical-messages.db"
+
+# Unlimited retry worker - NEVER gives up!
+worker:
+  retry_interval: 2m       # Check every 2 minutes for failed messages
+  batch_size: 25           # Process 25 messages at a time (each sent individually)
+  max_retries: 0           # 0 = UNLIMITED retries until successful delivery
+
+# Optional: Kafka as secondary target (uncomment if needed)
+# kafka:
+#   brokers:
+#     - "localhost:9092"
+#   retry_max: 3
+#   retry_backoff: 2s
+#   timeout: 30s 

@@ -1,0 +1,19 @@
+# Simple configuration for messagebridge
+# Minimal setup with only Kafka
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+routes:
+  - path: "/webhook/payment"
+    queue: "payment-events"
+
+kafka:
+  brokers:
+    - "localhost:9092"
+
+worker:
+  retry_interval: 5m       # How often to retry failed messages
+  batch_size: 50           # Messages per batch (each sent individually)
+  max_retries: 3           # Retry limit (0 = unlimited retries) 
