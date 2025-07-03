@@ -3,14 +3,13 @@
 
 # HTTP Server settings
 server:
-  host: "127.0.0.1"  # Bind to localhost for nginx proxy
+  host: "127.0.0.1"
   port: 8080
   
 # Domain configuration for nginx (SSL configured separately)
 nginx:
-  domain: "webhook.yourdomain.com"  # CHANGE THIS: Your actual domain name
-  # Note: SSL certificates are configured through certbot automatically
-  # Run: sudo certbot --nginx -d webhook.yourdomain.com
+  domain: "webhook.yourdomain.com"
+
 
 # Webhook routes
 routes:
