@@ -5,7 +5,11 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект придерживается [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.4]
+### Добавлено
+- Комментарии в конфиг systemd
+
+## [0.1.2]
 
 ### Добавлено
 - Первоначальная реализация MessageBridge
@@ -40,7 +44,7 @@
 - Standalone binaries
 - Docker Compose стэк
 
-## [1.0.0] - TBD
+## [0.1.1] - TBD
 
 ### Добавлено
 - Первый стабильный релиз 

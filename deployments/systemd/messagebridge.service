@@ -1,62 +1,61 @@
 [Unit]
-Description=MessageBridge - Secure Payment Webhook Gateway
-Documentation=https://github.com/expai/messagebridge
-After=network.target
-Wants=network.target
+Description=MessageBridge - Secure Payment Webhook Gateway  # Описание сервиса
+Documentation=https://github.com/expai/messagebridge         # Ссылка на документацию
+After=network.target                                        # Запускать после инициализации сети
+Wants=network.target                                        # Желательно, чтобы сеть была доступна
 
 [Service]
-Type=simple
-User=messagebridge
-Group=messagebridge
+Type=simple                                                 # Обычный сервис, основной процесс — это ExecStart
+User=messagebridge                                          # Запускать от пользователя messagebridge
+Group=messagebridge                                         # Запускать от группы messagebridge
 
 # Security settings
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/var/lib/messagebridge /var/log/messagebridge
-ProtectKernelTunables=true
-ProtectKernelModules=true
-ProtectControlGroups=true
-RestrictRealtime=true
-RestrictSUIDSGID=true
-RemoveIPC=true
-PrivateDevices=true
+NoNewPrivileges=true             # Запрещает процессу получать новые привилегии (например, через setuid)
+PrivateTmp=true                  # Выделяет отдельный /tmp для сервиса (невидим для других процессов)
+ProtectSystem=strict             # Только чтение для всей системы, кроме явно разрешённых путей
+ProtectHome=true                 # Запрещает доступ к домашним директориям пользователей
+ReadWritePaths=/var/lib/messagebridge /var/log/messagebridge # Разрешает запись только в эти директории
+ProtectKernelTunables=true       # Запрещает изменение настроек ядра (sysctl)
+ProtectKernelModules=true        # Запрещает загрузку/выгрузку модулей ядра
+ProtectControlGroups=true        # Запрещает доступ к cgroups (контролю ресурсов)
+RestrictRealtime=true            # Запрещает использование real-time приоритетов (RT-процессов)
+RestrictSUIDSGID=true            # Запрещает использование файлов с SUID/SGID битами
+RemoveIPC=true                   # Удаляет IPC-ресурсы (shared memory, semaphores) при завершении процесса
+PrivateDevices=true              # Скрывает /dev, только минимальный набор устройств доступен
 
 # Environment
-Environment=CONFIG_PATH=/etc/messagebridge/config.yaml
-WorkingDirectory=/var/lib/messagebridge
+Environment=CONFIG_PATH=/etc/messagebridge/config.yaml   # Переменная окружения с путём к конфигу
+WorkingDirectory=/var/lib/messagebridge                  # Рабочая директория процесса
 
 # Process management
-ExecStart=/usr/local/bin/messagebridge -config ${CONFIG_PATH}
-ExecReload=/bin/kill -HUP $MAINPID
-KillMode=mixed
-KillSignal=SIGTERM
-TimeoutStopSec=30
+ExecStart=/usr/local/bin/messagebridge -config ${CONFIG_PATH}  # Команда запуска сервиса
+ExecReload=/bin/kill -HUP $MAINPID                            # Как перезапустить (reload) сервис
+KillMode=mixed                                                # Сначала SIGTERM основному процессу, потом дочерним
+KillSignal=SIGTERM                                            # Сигнал для остановки процесса
+TimeoutStopSec=30                                             # Время ожидания завершения процесса при остановке (сек)
 
 # Restart policy
-Restart=always
-RestartSec=10
-StartLimitInterval=300
-StartLimitBurst=5
+Restart=always           # Всегда перезапускать при завершении
+RestartSec=10            # Ждать 10 секунд перед перезапуском
+StartLimitInterval=300   # За 300 секунд (5 минут)...
+StartLimitBurst=5        # ...разрешено не более 5 рестартов (иначе сервис будет заблокирован)
 
 # Restart conditions
-RestartKillSignal=SIGTERM
-RestartPreventExitStatus=0
+RestartKillSignal=SIGTERM         # Сигнал для завершения при рестарте
+RestartPreventExitStatus=0        # Не рестартовать, если процесс завершился с кодом 0 (успех)
 
 # Handle exit codes
-# ExitRestart=2 means the application requested a restart
-SuccessExitStatus=0 2
-RestartForceExitStatus=2
+SuccessExitStatus=0 2             # Коды завершения, считающиеся успешными (0 — обычный успех, 2 — сигнализирует о необходимости рестарта)
+RestartForceExitStatus=2          # Если приложение завершилось с кодом 2 — всегда рестартовать
 
 # Logging
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=messagebridge
+StandardOutput=journal            # Логировать stdout в systemd journal
+StandardError=journal             # Логировать stderr в systemd journal
+SyslogIdentifier=messagebridge    # Имя сервиса в логах
 
 # Resource limits
-LimitNOFILE=65536
-LimitNPROC=4096
+LimitNOFILE=65536                 # Максимальное количество открытых файловых дескрипторов
+LimitNPROC=4096                   # Максимальное количество процессов/потоков
 
 [Install]
-WantedBy=multi-user.target 
+WantedBy=multi-user.target        # Автоматически запускать при загрузке системы (обычный режим для серверов) 
