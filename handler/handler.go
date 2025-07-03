@@ -30,7 +30,7 @@ func NewMessageHandler(cfg *config.Config, kafkaProducer *kafka.Producer, httpCl
 }
 
 // ProcessWebhook processes incoming webhook messages
-func (h *MessageHandler) ProcessWebhook(msg *models.WebhookMessage) error {
+func (h *MessageHandler) ProcessWebhookOld(msg *models.WebhookMessage) error {
 	log.Printf("Processing webhook message %s for queue %s", msg.ID, msg.Queue)
 
 	// Determine delivery strategy
@@ -67,6 +67,25 @@ func (h *MessageHandler) ProcessWebhook(msg *models.WebhookMessage) error {
 
 	msg.Status = models.StatusSent
 	log.Printf("Message %s sent successfully", msg.ID)
+	return nil
+}
+
+// ProcessWebhook processes incoming webhook messages and stores them in database
+func (h *MessageHandler) ProcessWebhook(msg *models.WebhookMessage) error {
+	log.Printf("Processing webhook message %s for queue %s", msg.ID, msg.Queue)
+
+	if h.storage == nil {
+		return fmt.Errorf("storage is not configured")
+	}
+
+	msg.Status = models.StatusPending
+
+	if err := h.storage.SaveMessage(msg); err != nil {
+		log.Printf("Failed to save message %s to storage: %v", msg.ID, err)
+		return fmt.Errorf("failed to save message to storage: %w", err)
+	}
+
+	log.Printf("Message %s saved to storage for processing by worker", msg.ID)
 	return nil
 }
 

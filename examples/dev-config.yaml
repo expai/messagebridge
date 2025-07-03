@@ -1,0 +1,60 @@
+# Production configuration for messagebridge
+# Recommended configuration for production deployment with nginx
+
+# HTTP Server settings
+server:
+  host: "127.0.0.1"
+  port: 8080
+  
+# Domain configuration for nginx (SSL configured separately)
+nginx:
+  domain: "webhook.yourdomain.com"
+
+
+# Webhook routes
+routes:
+  - path: "/webhook/payment"
+    queue: "payment-events"
+  - path: "/webhook/user"
+    queue: "user-events"
+  - path: "/webhook/order"
+    queue: "order-events"
+
+# Kafka configuration (recommended for production)
+# kafka:
+#   brokers:
+#     - "localhost:9092"
+#   # Security settings for production
+#   # security_protocol: "SASL_SSL"
+#   # sasl_mechanism: "SCRAM-SHA-256"
+#   # sasl_username: "your-username"
+#   # sasl_password: "your-password"
+#   # tls_enabled: true
+#   retry_max: 3
+#   retry_backoff: 2s
+#   batch_size: 100
+#   timeout: 30s
+
+# Remote URL forwarding (enabled by default for production)
+remote_url:
+  url: "https://api.yourdomain.com/webhooks"  # CHANGE THIS: Your webhook processing endpoint
+  timeout: 30s
+  retries: 3
+
+# SQLite backup storage (always enabled for reliability)
+sqlite:
+  database_path: "dist/messages.db"
+
+# Worker settings for retry logic
+worker:
+  retry_interval: 10s       # Interval between retry attempts
+  batch_size: 50           # Number of messages to process at once (sent individually)
+  max_retries: 0           # Maximum retry attempts (0 = unlimited retries until delivered)
+
+# Optional: Logging configuration
+# logging:
+#   level: "info"
+#   file: "/var/log/messagebridge/app.log"
+#   max_size: 100  # MB
+#   max_age: 30    # days
+#   max_backups: 3 

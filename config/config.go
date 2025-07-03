@@ -126,14 +126,14 @@ func (c *Config) Validate() error {
 	}
 
 	// Validate that at least Kafka is configured
-	if c.Kafka == nil {
-		return fmt.Errorf("kafka configuration is required")
-	}
+	// if c.Kafka == nil {
+	// 	return fmt.Errorf("kafka configuration is required")
+	// }
 
 	// Validate Kafka settings
-	if len(c.Kafka.Brokers) == 0 {
-		return fmt.Errorf("kafka.brokers is required")
-	}
+	// if len(c.Kafka.Brokers) == 0 {
+	// 	return fmt.Errorf("kafka.brokers is required")
+	// }
 
 	// Validate remote URL settings
 	if c.RemoteURL != nil && c.SQLite == nil {
@@ -178,7 +178,7 @@ func (c *Config) setDefaults() {
 	if c.Worker.BatchSize == 0 {
 		c.Worker.BatchSize = 50
 	}
-	if c.Worker.MaxRetries == 0 {
-		c.Worker.MaxRetries = 5
-	}
+	// if c.Worker.MaxRetries == 0 {
+	// 	c.Worker.MaxRetries = 5
+	// }
 }

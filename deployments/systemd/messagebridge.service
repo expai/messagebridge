@@ -1,61 +1,101 @@
 [Unit]
-Description=MessageBridge - Secure Payment Webhook Gateway  # Описание сервиса
-Documentation=https://github.com/expai/messagebridge         # Ссылка на документацию
-After=network.target                                        # Запускать после инициализации сети
-Wants=network.target                                        # Желательно, чтобы сеть была доступна
+# Описание сервиса
+Description=MessageBridge - Secure Payment Webhook Gateway 
+# Ссылка на документацию
+Documentation=https://github.com/expai/messagebridge
+# Запускать после инициализации сети         
+After=network.target
+# Желательно, чтобы сеть была доступна                                        
+Wants=network.target
 
 [Service]
-Type=simple                                                 # Обычный сервис, основной процесс — это ExecStart
-User=messagebridge                                          # Запускать от пользователя messagebridge
-Group=messagebridge                                         # Запускать от группы messagebridge
+# Обычный сервис, основной процесс — это ExecStart
+Type=simple
+# Запускать от пользователя messagebridge
+User=messagebridge
+# Запускать от группы messagebridge
+Group=messagebridge
 
 # Security settings
-NoNewPrivileges=true             # Запрещает процессу получать новые привилегии (например, через setuid)
-PrivateTmp=true                  # Выделяет отдельный /tmp для сервиса (невидим для других процессов)
-ProtectSystem=strict             # Только чтение для всей системы, кроме явно разрешённых путей
-ProtectHome=true                 # Запрещает доступ к домашним директориям пользователей
-ReadWritePaths=/var/lib/messagebridge /var/log/messagebridge # Разрешает запись только в эти директории
-ProtectKernelTunables=true       # Запрещает изменение настроек ядра (sysctl)
-ProtectKernelModules=true        # Запрещает загрузку/выгрузку модулей ядра
-ProtectControlGroups=true        # Запрещает доступ к cgroups (контролю ресурсов)
-RestrictRealtime=true            # Запрещает использование real-time приоритетов (RT-процессов)
-RestrictSUIDSGID=true            # Запрещает использование файлов с SUID/SGID битами
-RemoveIPC=true                   # Удаляет IPC-ресурсы (shared memory, semaphores) при завершении процесса
-PrivateDevices=true              # Скрывает /dev, только минимальный набор устройств доступен
+# Запрещает процессу получать новые привилегии (например, через setuid)
+NoNewPrivileges=true
+# Выделяет отдельный /tmp для сервиса (невидим для других процессов)
+PrivateTmp=true
+# Только чтение для всей системы, кроме явно разрешённых путей      
+ProtectSystem=strict             
+# Запрещает доступ к домашним директориям пользователей
+ProtectHome=true
+# Разрешает запись только в эти директории
+ReadWritePaths=/var/lib/messagebridge /var/log/messagebridge
+# Запрещает изменение настроек ядра (sysctl)
+ProtectKernelTunables=true
+# Запрещает загрузку/выгрузку модулей ядра
+ProtectKernelModules=true
+# Запрещает доступ к cgroups (контролю ресурсов)
+ProtectControlGroups=true
+# Запрещает использование real-time приоритетов (RT-процессов)
+RestrictRealtime=true
+# Запрещает использование файлов с SUID/SGID битами
+RestrictSUIDSGID=true
+# Удаляет IPC-ресурсы (shared memory, semaphores) при завершении процесса
+RemoveIPC=true
+# Скрывает /dev, только минимальный набор устройств доступен
+PrivateDevices=true
 
 # Environment
-Environment=CONFIG_PATH=/etc/messagebridge/config.yaml   # Переменная окружения с путём к конфигу
-WorkingDirectory=/var/lib/messagebridge                  # Рабочая директория процесса
+# Переменная окружения с путём к конфигу
+Environment=CONFIG_PATH=/etc/messagebridge/config.yaml
+# Рабочая директория процесса
+WorkingDirectory=/var/lib/messagebridge
 
 # Process management
-ExecStart=/usr/local/bin/messagebridge -config ${CONFIG_PATH}  # Команда запуска сервиса
-ExecReload=/bin/kill -HUP $MAINPID                            # Как перезапустить (reload) сервис
-KillMode=mixed                                                # Сначала SIGTERM основному процессу, потом дочерним
-KillSignal=SIGTERM                                            # Сигнал для остановки процесса
-TimeoutStopSec=30                                             # Время ожидания завершения процесса при остановке (сек)
+# Команда запуска сервиса
+ExecStart=/usr/local/bin/messagebridge -config ${CONFIG_PATH}
+# Как перезапустить (reload) сервис
+ExecReload=/bin/kill -HUP $MAINPID
+# Сначала SIGTERM основному процессу, потом дочерним
+KillMode=mixed
+# Сигнал для остановки процесса
+KillSignal=SIGTERM
+# Время ожидания завершения процесса при остановке (сек)
+TimeoutStopSec=30                                             
 
 # Restart policy
-Restart=always           # Всегда перезапускать при завершении
-RestartSec=10            # Ждать 10 секунд перед перезапуском
-StartLimitInterval=300   # За 300 секунд (5 минут)...
-StartLimitBurst=5        # ...разрешено не более 5 рестартов (иначе сервис будет заблокирован)
+# Всегда перезапускать при завершении
+Restart=always
+ # Ждать 10 секунд перед перезапуском
+RestartSec=10
+# За 300 секунд (5 минут)...
+StartLimitInterval=300
+# ...разрешено не более 5 рестартов (иначе сервис будет заблокирован)
+StartLimitBurst=5
 
 # Restart conditions
-RestartKillSignal=SIGTERM         # Сигнал для завершения при рестарте
-RestartPreventExitStatus=0        # Не рестартовать, если процесс завершился с кодом 0 (успех)
+# Сигнал для завершения при рестарте
+RestartKillSignal=SIGTERM
+# Не рестартовать, если процесс завершился с кодом 0 (успех)
+RestartPreventExitStatus=0
 
 # Handle exit codes
-SuccessExitStatus=0 2             # Коды завершения, считающиеся успешными (0 — обычный успех, 2 — сигнализирует о необходимости рестарта)
-RestartForceExitStatus=2          # Если приложение завершилось с кодом 2 — всегда рестартовать
+# Коды завершения, считающиеся успешными (0 — обычный успех, 2 — сигнализирует о необходимости рестарта)
+SuccessExitStatus=0 2
+# Если приложение завершилось с кодом 2 — всегда рестартовать
+RestartForceExitStatus=2
 
 # Logging
-StandardOutput=journal            # Логировать stdout в systemd journal
-StandardError=journal             # Логировать stderr в systemd journal
-SyslogIdentifier=messagebridge    # Имя сервиса в логах
+# Логировать stdout в systemd journal
+StandardOutput=journal
+# Логировать stderr в systemd journal
+StandardError=journal
+# Имя сервиса в логах
+SyslogIdentifier=messagebridge
 
 # Resource limits
-LimitNOFILE=65536                 # Максимальное количество открытых файловых дескрипторов
-LimitNPROC=4096                   # Максимальное количество процессов/потоков
+# Максимальное количество открытых файловых дескрипторов
+LimitNOFILE=65536
+# Максимальное количество процессов/потоков
+LimitNPROC=4096
 
 [Install]
-WantedBy=multi-user.target        # Автоматически запускать при загрузке системы (обычный режим для серверов) 
+# Автоматически запускать при загрузке системы (обычный режим для серверов)
+WantedBy=multi-user.target
