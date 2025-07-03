@@ -32,11 +32,17 @@ jobs:
     - name: Build binaries
       run: |
         # Linux AMD64
-        CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.version.outputs.VERSION }} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o messagebridge-linux-amd64 .
+        CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.version.outputs.VERSION }} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o messagebridge .
         
-        # Create archives
-        chmod +x scripts/*.sh
-        tar -czf messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz messagebridge-linux-amd64 examples/ deployments/ scripts/ README.md QUICKSTART.md LICENSE CHANGELOG.md
+        # Create directory structure for archive
+        mkdir -p messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64
+        cp messagebridge messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64/
+        cp -r examples deployments scripts messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64/
+        cp README.md QUICKSTART.md LICENSE CHANGELOG.md messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64/
+        
+        # Create archive
+        chmod +x messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64/scripts/*.sh
+        tar -czf messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64/
         
         # Create checksums
         sha256sum messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz > checksums.txt
@@ -84,7 +90,7 @@ jobs:
           sudo ./scripts/install.sh --minimal
           
           # Или ручная установка
-          sudo cp messagebridge-linux-amd64 /usr/local/bin/messagebridge
+          sudo cp messagebridge /usr/local/bin/messagebridge
           sudo chmod +x /usr/local/bin/messagebridge
           ```
           
