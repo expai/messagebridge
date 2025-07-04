@@ -491,7 +491,7 @@ MIT License
 Для вопросов и поддержки:
 
 - GitHub Issues: [создать issue](https://github.com/expai/messagebridge/issues)
-- Email: support@yourcompany.com
+- Email: ops.alexandr@gmail.com
 
 ## 🏷️ Версионирование
 
