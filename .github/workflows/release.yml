@@ -69,43 +69,289 @@ jobs:
         tag_name: ${{ steps.version.outputs.VERSION }}
         release_name: MessageBridge ${{ steps.version.outputs.VERSION }}
         body: |
-          ## MessageBridge ${{ steps.version.outputs.VERSION }}
+          # MessageBridge ${{ steps.version.outputs.VERSION }}
           
-          ### 📦 Загрузки
+          ## 🚀 Автоматическая установка (рекомендуется)
           
-          - **Linux AMD64**: `messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz`
+          ### Быстрая установка:
+          ```bash
+          # Скачать и установить одной командой (Ubuntu/Debian/Arch):
+          curl -fsSL https://github.com/expai/messagebridge/releases/download/${{ steps.version.outputs.VERSION }}/messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz | tar -xz
+          cd messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64
           
-          ### 🚀 Быстрый запуск
+          # Опционально: проверить системные требования
+          ./scripts/check-requirements.sh
+          
+          # Установить
+          sudo ./scripts/install.sh
+          ```
+          
+          ### Опции установки через install.sh:
+          
+          #### `install.sh` - основной скрипт установки:
+          - **Без параметров** - полная автоматическая установка production сервера
+          - Автоматически определяет ОС (Ubuntu/Debian/Arch Linux)
+          - Устанавливает зависимости (SQLite, nginx)
+          - Создает пользователя `messagebridge`
+          - Настраивает systemd service
+          - Генерирует nginx конфигурацию (HTTP-only)
+          - **⚠️ SSL ОБЯЗАТЕЛЬНО настроить вручную после установки!**
           
           ```bash
-          # Скачивание и распаковка
+          # Проверить системные требования (рекомендуется)
+          ./scripts/check-requirements.sh
+          
+          # Полная production установка (по умолчанию)
+          sudo ./scripts/install.sh
+          
+          # Минимальная установка (только бинарь и systemd, без nginx)
+          sudo ./scripts/install.sh --minimal
+          
+          # Пропустить nginx (аналогично --minimal)
+          sudo ./scripts/install.sh --skip-nginx
+          
+          # Принудительная установка (перезаписать существующую)
+          sudo ./scripts/install.sh --force
+          ```
+          
+          ### Проверка системных требований:
+          
+          Перед установкой рекомендуется проверить системные требования:
+          ```bash
+          # Проверить совместимость ОС, зависимости, порты и права
+          ./scripts/check-requirements.sh
+          ```
+          
+          ### После установки:
+          
+          #### 1. Обязательная настройка SSL:
+          ```bash
+          # Установить certbot (если не установлен):
+          sudo apt install certbot python3-certbot-nginx  # Ubuntu/Debian
+          sudo pacman -S certbot-nginx                    # Arch Linux
+          
+          # Получить SSL сертификат:
+          sudo certbot --nginx -d your-domain.com
+          
+          # Проверить автообновление:
+          sudo certbot renew --dry-run
+          ```
+          
+          #### 2. Управление сервисом:
+          ```bash
+          # Проверить статус
+          sudo systemctl status messagebridge
+          
+          # Перезапустить
+          sudo systemctl restart messagebridge
+          
+          # Просмотр логов
+          sudo journalctl -u messagebridge -f
+          ```
+          
+          ## 📊 Мониторинг и статистика
+          
+          ### Скрипт статистики БД (`scripts/stats.sh`):
+          ```bash
+          # Общая статистика
+          ./scripts/stats.sh
+          
+          # Показать сообщения с пагинацией
+          ./scripts/stats.sh --messages --page 1 --limit 10
+          
+          # Фильтр по статусу
+          ./scripts/stats.sh --status pending
+          ./scripts/stats.sh --status failed
+          
+          # Фильтр по очереди
+          ./scripts/stats.sh --queue payments
+          
+          # Детальная информация о сообщении
+          ./scripts/stats.sh --message-id "msg-123"
+          
+          # Анализ ошибок
+          ./scripts/stats.sh --failed-details
+          
+          # Анализ повторных попыток
+          ./scripts/stats.sh --retry-analysis
+          
+          # Анализ производительности
+          ./scripts/stats.sh --performance
+          
+          # Предложения по очистке БД
+          ./scripts/stats.sh --cleanup-suggestions
+          
+          # Экспорт в JSON
+          ./scripts/stats.sh --json
+          
+          # Экспорт в CSV
+          ./scripts/stats.sh --csv
+          ```
+          
+          ## 🗑️ Удаление
+          
+          ### Скрипт удаления (`scripts/uninstall.sh`):
+          
+          ```bash
+          # Безопасное удаление (сохраняет данные и конфиги)
+          sudo ./scripts/uninstall.sh --safe
+          
+          # Полное удаление (удаляет ВСЕ данные и конфиги)
+          sudo ./scripts/uninstall.sh --full
+          
+          # Удалить только nginx конфигурацию
+          sudo ./scripts/uninstall.sh --nginx-only
+          
+          # Удалить только systemd service
+          sudo ./scripts/uninstall.sh --service-only
+          ```
+          
+          #### Что удаляется при различных режимах:
+          
+          **Безопасное удаление (`--safe`):**
+          - ✅ Останавливает и удаляет systemd service
+          - ✅ Удаляет бинарный файл `/usr/local/bin/messagebridge`
+          - ✅ Удаляет nginx конфигурацию
+          - ❌ СОХРАНЯЕТ базу данных (`/var/lib/messagebridge/`)
+          - ❌ СОХРАНЯЕТ конфигурационные файлы (`/etc/messagebridge/`)
+          - ❌ СОХРАНЯЕТ пользователя `messagebridge`
+          
+          **Полное удаление (`--full`):**
+          - ✅ Удаляет systemd service
+          - ✅ Удаляет бинарный файл
+          - ✅ Удаляет nginx конфигурацию
+          - ✅ **УДАЛЯЕТ базу данных** (`/var/lib/messagebridge/`)
+          - ✅ **УДАЛЯЕТ конфигурационные файлы** (`/etc/messagebridge/`)
+          - ✅ **УДАЛЯЕТ пользователя** `messagebridge`
+          
+          ## 📁 Создаваемые файлы и директории
+          
+          ### После установки создаются:
+          
+          #### Системные файлы:
+          - `/usr/local/bin/messagebridge` - исполняемый файл
+          - `/etc/systemd/system/messagebridge.service` - systemd service
+          - `/etc/nginx/sites-available/messagebridge` - nginx конфигурация (если не --minimal)
+          - `/etc/nginx/sites-enabled/messagebridge` - симлинк nginx конфигурации
+          
+          #### Конфигурация:
+          - `/etc/messagebridge/config.yaml` - основной конфиг (из production-config.yaml)
+          - `/etc/messagebridge/examples/` - копия примеров конфигураций
+          
+          #### Данные и логи:
+          - `/var/lib/messagebridge/` - рабочая директория и домашняя папка пользователя
+          - `/var/lib/messagebridge/messagebridge.db` - база данных SQLite (создается при запуске)
+          - `/var/log/messagebridge/` - директория для логов
+          - Логи systemd: `journalctl -u messagebridge`
+          
+          #### Пользователь и права:
+          - Пользователь: `messagebridge:messagebridge` (системный пользователь)
+          - Домашняя директория: `/var/lib/messagebridge`
+          - Права на запись: `/var/lib/messagebridge`, `/var/log/messagebridge`
+          
+          ## 🔧 Ручная установка
+          
+          Если автоматическая установка не подходит:
+          
+          ### 1. Скачать и распаковать архив:
+          ```bash
           wget https://github.com/expai/messagebridge/releases/download/${{ steps.version.outputs.VERSION }}/messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
           tar -xzf messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
           cd messagebridge-${{ steps.version.outputs.VERSION }}-linux-amd64/
-          
-          # Автоматическая установка (полная с nginx)
-          sudo ./scripts/install.sh
-          
-          # Или минимальная установка
-          sudo ./scripts/install.sh --minimal
-          
-          # Или ручная установка
-          sudo cp messagebridge /usr/local/bin/messagebridge
-          sudo chmod +x /usr/local/bin/messagebridge
           ```
           
-          ### 📦 Содержимое архива
+          ### 2. Установить компоненты вручную:
+          ```bash
+          # 1. Скопировать бинарь
+          sudo cp messagebridge /usr/local/bin/
+          sudo chmod +x /usr/local/bin/messagebridge
           
-          - `messagebridge` - Исполняемый файл
-          - `examples/` - Примеры конфигураций
-          - `scripts/` - Скрипты установки и удаления
-          - `deployments/` - Файлы для systemd
-          - Документация (README, QUICKSTART, LICENSE)
+          # 2. Создать пользователя
+          sudo useradd -r -s /bin/false -d /var/lib/messagebridge messagebridge
           
-          ### 🐳 Docker
+          # 3. Создать директории
+          sudo mkdir -p /etc/messagebridge /var/lib/messagebridge /var/log/messagebridge
+          sudo chown messagebridge:messagebridge /var/lib/messagebridge /var/log/messagebridge
+          
+          # 4. Скопировать конфигурацию
+          sudo cp examples/production-config.yaml /etc/messagebridge/config.yaml
+          sudo cp -r examples /etc/messagebridge/
+          
+          # 5. Установить systemd service
+          sudo cp deployments/systemd/messagebridge.service /etc/systemd/system/
+          sudo systemctl daemon-reload
+          sudo systemctl enable messagebridge
+          sudo systemctl start messagebridge
+          ```
+          
+          ### 3. Настроить nginx (опционально):
+          ```bash
+          # Скопировать конфигурацию nginx
+          sudo cp deployments/nginx/messagebridge /etc/nginx/sites-available/
+          sudo ln -s /etc/nginx/sites-available/messagebridge /etc/nginx/sites-enabled/
+          sudo nginx -t && sudo systemctl reload nginx
+          ```
+          
+          ## 📋 Health Check и мониторинг
+          
+          ### Проверка состояния:
+          ```bash
+          # HTTP health check
+          curl http://localhost:8080/health
+          
+          # Статистика worker'а
+          curl http://localhost:8080/stats
+          
+          # Проверка nginx
+          sudo nginx -t
+          
+          # Проверка systemd service
+          sudo systemctl status messagebridge
+          ```
+          
+          ## 📖 Содержимое архива
+          
+          - `messagebridge` - исполняемый файл (Linux AMD64)
+          - `examples/` - примеры конфигураций для разных сценариев
+          - `scripts/install.sh` - скрипт автоматической установки
+          - `scripts/uninstall.sh` - скрипт удаления
+          - `scripts/stats.sh` - скрипт мониторинга базы данных
+          - `scripts/check-requirements.sh` - скрипт проверки системных требований
+          - `deployments/systemd/` - файлы для systemd
+          - `deployments/nginx/` - шаблоны конфигурации nginx
+          - `README.md` - полная документация
+          - `QUICKSTART.md` - быстрый старт
+          - `LICENSE` - лицензия
+          - `CHANGELOG.md` - история изменений
+          
+          ## ⚠️ Важные замечания
+          
+          1. **SSL обязателен** для production - HTTP-only конфигурация nginx создается только для начальной настройки
+          2. **Firewall** - убедитесь что порты 80, 443 открыты
+          3. **DNS** - настройте A-запись домена на ваш сервер
+          4. **Backup** - регулярно делайте бэкап `/var/lib/messagebridge/messagebridge.db`
+          5. **Мониторинг** - используйте `scripts/stats.sh` для мониторинга очереди сообщений
+          
+          ## 🐛 Troubleshooting
           
           ```bash
-          docker pull expai/messagebridge:${{ steps.version.outputs.VERSION }}
+          # Проверить статус всех компонентов
+          sudo systemctl status messagebridge nginx
+          
+          # Проверить логи
+          sudo journalctl -u messagebridge -f
+          sudo journalctl -u nginx -f
+          
+          # Проверить конфигурацию
+          sudo nginx -t
+          messagebridge -config /etc/messagebridge/config.yaml --help
+          
+          # Проверить подключение к базе
+          ./scripts/stats.sh --summary
+          
+          # Проверить права доступа
+          ls -la /var/lib/messagebridge/
+          ls -la /etc/messagebridge/
           ```
           
           ${{ steps.changelog.outputs.CHANGELOG }}
