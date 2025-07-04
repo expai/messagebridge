@@ -32,6 +32,32 @@ sudo systemctl restart messagebridge
 sudo ./scripts/install.sh --force
 ```
 
+### Database readonly error
+
+**Symptoms:**
+```bash
+# In logs: attempt to write a readonly database
+sudo journalctl -u messagebridge -f
+# Shows: Failed to save message to storage: attempt to write a readonly database
+```
+
+**Cause:** The SQLite database files have incorrect permissions and cannot be written by the `messagebridge` user.
+
+**Quick Fix:**
+```bash
+# Fix database permissions
+sudo chown -R messagebridge:messagebridge /var/lib/messagebridge
+sudo chmod 750 /var/lib/messagebridge
+sudo find /var/lib/messagebridge -name "*.db*" -exec chmod 640 {} \;
+sudo systemctl restart messagebridge
+
+# Or use the fix script (recommended)
+sudo ./scripts/fix-permissions.sh
+
+# Or fix only database permissions (faster)
+sudo ./scripts/fix-database-permissions.sh
+```
+
 ## Service Issues
 
 ### Service fails to start

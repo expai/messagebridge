@@ -56,9 +56,13 @@ else
 fi
 
 if [ -d "$DATA_DIR" ]; then
-    chown "$APP_USER:$APP_USER" "$DATA_DIR"
+    chown -R "$APP_USER:$APP_USER" "$DATA_DIR"
     chmod 750 "$DATA_DIR"
+    # Fix existing database files
+    find "$DATA_DIR" -name "*.db" -exec chmod 640 {} \;
+    find "$DATA_DIR" -name "*.db-*" -exec chmod 640 {} \;
     print_success "Fixed data directory permissions: $DATA_DIR"
+    print_success "Fixed database file permissions"
 fi
 
 if [ -d "$LOG_DIR" ]; then

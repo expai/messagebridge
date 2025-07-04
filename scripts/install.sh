@@ -241,8 +241,11 @@ fix_permissions() {
     fi
     
     if [ -d "$DATA_DIR" ]; then
-        chown "$APP_USER:$APP_USER" "$DATA_DIR"
+        chown -R "$APP_USER:$APP_USER" "$DATA_DIR"
         chmod 750 "$DATA_DIR"
+        # Fix existing database files
+        find "$DATA_DIR" -name "*.db" -exec chmod 640 {} \; 2>/dev/null || true
+        find "$DATA_DIR" -name "*.db-*" -exec chmod 640 {} \; 2>/dev/null || true
     fi
     
     if [ -d "$LOG_DIR" ]; then

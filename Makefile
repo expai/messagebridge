@@ -115,6 +115,11 @@ fix-permissions: ## Fix permissions for existing installation
 	chmod +x scripts/fix-permissions.sh
 	sudo ./scripts/fix-permissions.sh
 
+fix-database: ## Fix database permissions only
+	@echo "Fixing database permissions for MessageBridge..."
+	chmod +x scripts/fix-database-permissions.sh
+	sudo ./scripts/fix-database-permissions.sh
+
 ##@ Service Management
 
 start: ## Start the service
