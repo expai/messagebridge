@@ -82,6 +82,9 @@ jobs:
           # Опционально: проверить системные требования
           ./scripts/check-requirements.sh
           
+          # Перед установкой нужно поправить файл конфигурации в директории examples/production-config.yaml
+          nano examples/production-config.yaml
+
           # Установить
           sudo ./scripts/install.sh
           ```
