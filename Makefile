@@ -110,6 +110,11 @@ uninstall-safe: ## Safe removal preserving data and config
 	chmod +x scripts/uninstall.sh
 	sudo ./scripts/uninstall.sh
 
+fix-permissions: ## Fix permissions for existing installation
+	@echo "Fixing permissions for MessageBridge..."
+	chmod +x scripts/fix-permissions.sh
+	sudo ./scripts/fix-permissions.sh
+
 ##@ Service Management
 
 start: ## Start the service
@@ -152,8 +157,8 @@ release: test build-linux ## Prepare release build
 	cp -r deployments dist/
 	cp -r scripts dist/
 	chmod +x dist/scripts/*.sh
-	cp README.md QUICKSTART.md LICENSE CHANGELOG.md dist/ 2>/dev/null || true
-	tar -czf dist/$(APP_NAME)-$(VERSION)-linux-amd64.tar.gz -C dist $(APP_NAME) examples deployments scripts README.md QUICKSTART.md LICENSE CHANGELOG.md
+	cp README.md QUICKSTART.md LICENSE CHANGELOG.md TROUBLESHOOTING.md dist/ 2>/dev/null || true
+	tar -czf dist/$(APP_NAME)-$(VERSION)-linux-amd64.tar.gz -C dist $(APP_NAME) examples deployments scripts README.md QUICKSTART.md LICENSE CHANGELOG.md TROUBLESHOOTING.md
 	@echo "Release package created: dist/$(APP_NAME)-$(VERSION)-linux-amd64.tar.gz"
 	@echo "Package contents:"
 	@echo "  - $(APP_NAME) binary"

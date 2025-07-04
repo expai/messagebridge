@@ -222,8 +222,46 @@ setup_user_and_directories() {
     mkdir -p "$CONFIG_DIR" "$DATA_DIR" "$LOG_DIR"
     chown "$APP_USER:$APP_USER" "$DATA_DIR" "$LOG_DIR"
     chmod 750 "$DATA_DIR" "$LOG_DIR"
+    
+    # Set proper permissions for config directory
+    chown root:$APP_USER "$CONFIG_DIR"
+    chmod 750 "$CONFIG_DIR"
 
     print_success "Directories created and configured"
+}
+
+# Fix permissions for existing installation
+fix_permissions() {
+    print_info "Fixing permissions for existing installation..."
+    
+    # Fix directory permissions
+    if [ -d "$CONFIG_DIR" ]; then
+        chown root:$APP_USER "$CONFIG_DIR"
+        chmod 750 "$CONFIG_DIR"
+    fi
+    
+    if [ -d "$DATA_DIR" ]; then
+        chown "$APP_USER:$APP_USER" "$DATA_DIR"
+        chmod 750 "$DATA_DIR"
+    fi
+    
+    if [ -d "$LOG_DIR" ]; then
+        chown "$APP_USER:$APP_USER" "$LOG_DIR"
+        chmod 750 "$LOG_DIR"
+    fi
+    
+    # Fix config file permissions
+    if [ -f "$CONFIG_DIR/config.yaml" ]; then
+        chown root:$APP_USER "$CONFIG_DIR/config.yaml"
+        chmod 640 "$CONFIG_DIR/config.yaml"
+    fi
+    
+    # Fix binary permissions
+    if [ -f "$INSTALL_DIR/$APP_NAME" ]; then
+        chmod +x "$INSTALL_DIR/$APP_NAME"
+    fi
+    
+    print_success "Permissions fixed"
 }
 
 # Install application binary
@@ -248,7 +286,8 @@ install_config() {
 
     if [ -f "./examples/production-config.yaml" ]; then
         cp "./examples/production-config.yaml" "$CONFIG_DIR/config.yaml"
-        chown root:root "$CONFIG_DIR/config.yaml"
+        # Make config readable by messagebridge user
+        chown root:$APP_USER "$CONFIG_DIR/config.yaml"
         chmod 640 "$CONFIG_DIR/config.yaml"
         print_success "Configuration installed to $CONFIG_DIR/config.yaml"
     else
@@ -520,6 +559,12 @@ main() {
     check_existing_installation
     check_dependencies
     setup_user_and_directories
+    
+    # Fix permissions for existing installations (force install or re-install)
+    if [[ "$FORCE_INSTALL" == true ]] || [ -f "$INSTALL_DIR/$APP_NAME" ]; then
+        fix_permissions
+    fi
+    
     install_binary
     install_config
     install_systemd_service

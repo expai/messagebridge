@@ -193,3 +193,4 @@ func (p *Producer) GetTopics() ([]string, error) {
 
 	return topics, nil
 }
+ 

@@ -242,4 +242,15 @@ sudo sqlite3 /var/lib/messagebridge/messages.db "SELECT status, COUNT(*) FROM me
 
 # Для Docker
 docker-compose exec messagebridge sqlite3 /var/lib/messagebridge/messages.db "SELECT status, COUNT(*) FROM messages GROUP BY status;"
-``` 
+```
+
+**Проблема**: Permission denied для конфигурации
+```bash
+# Быстрое исправление прав доступа
+sudo ./scripts/fix-permissions.sh
+
+# Или через Makefile
+make fix-permissions
+```
+
+**Дополнительная помощь**: Полное руководство по устранению неполадок доступно в [TROUBLESHOOTING.md](TROUBLESHOOTING.md) 
