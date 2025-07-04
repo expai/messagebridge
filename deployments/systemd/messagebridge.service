@@ -50,7 +50,7 @@ WorkingDirectory=/var/lib/messagebridge
 
 # Process management
 # Команда запуска сервиса
-ExecStart=/usr/local/bin/messagebridge -config ${CONFIG_PATH}
+ExecStart=/usr/local/bin/messagebridge -config /etc/messagebridge/config.yaml
 # Как перезапустить (reload) сервис
 ExecReload=/bin/kill -HUP $MAINPID
 # Сначала SIGTERM основному процессу, потом дочерним
