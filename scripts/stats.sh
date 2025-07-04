@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # Настройки по умолчанию
-DB_PATH="/var/lib/messagebridge/messagebridge.db"
+DB_PATH="/var/lib/messagebridge/messages.db"
 DEFAULT_LIMIT=20
 DEFAULT_PAGE=1
 
