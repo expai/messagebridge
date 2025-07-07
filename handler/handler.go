@@ -5,22 +5,20 @@ import (
 	"log"
 
 	"github.com/expai/messagebridge/config"
-	"github.com/expai/messagebridge/httpclient"
-	"github.com/expai/messagebridge/kafka"
+	"github.com/expai/messagebridge/internal/interfaces"
 	"github.com/expai/messagebridge/models"
-	"github.com/expai/messagebridge/storage"
 )
 
 // MessageHandler processes webhook messages
 type MessageHandler struct {
 	config        *config.Config
-	kafkaProducer *kafka.Producer
-	httpClient    *httpclient.Client
-	storage       *storage.SQLiteStorage
+	kafkaProducer interfaces.MessageProducer
+	httpClient    interfaces.HTTPSender
+	storage       interfaces.MessageStorage
 }
 
 // NewMessageHandler creates a new message handler
-func NewMessageHandler(cfg *config.Config, kafkaProducer *kafka.Producer, httpClient *httpclient.Client, storage *storage.SQLiteStorage) *MessageHandler {
+func NewMessageHandler(cfg *config.Config, kafkaProducer interfaces.MessageProducer, httpClient interfaces.HTTPSender, storage interfaces.MessageStorage) *MessageHandler {
 	return &MessageHandler{
 		config:        cfg,
 		kafkaProducer: kafkaProducer,

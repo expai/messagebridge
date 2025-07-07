@@ -14,6 +14,7 @@ import (
 	"github.com/expai/messagebridge/config"
 	"github.com/expai/messagebridge/handler"
 	"github.com/expai/messagebridge/httpclient"
+	"github.com/expai/messagebridge/internal/interfaces"
 	"github.com/expai/messagebridge/kafka"
 	"github.com/expai/messagebridge/server"
 	"github.com/expai/messagebridge/storage"
@@ -112,10 +113,10 @@ type Application struct {
 	config        *config.Config
 	server        *server.Server
 	worker        *worker.Worker
-	handler       *handler.MessageHandler
-	kafkaProducer *kafka.Producer
-	httpClient    *httpclient.Client
-	storage       *storage.SQLiteStorage
+	handler       interfaces.WebhookHandler
+	kafkaProducer interfaces.MessageProducer
+	httpClient    interfaces.HTTPSender
+	storage       interfaces.MessageStorage
 	wg            sync.WaitGroup
 }
 

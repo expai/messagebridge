@@ -8,17 +8,15 @@ import (
 	"time"
 
 	"github.com/expai/messagebridge/config"
-	"github.com/expai/messagebridge/httpclient"
-	"github.com/expai/messagebridge/kafka"
+	"github.com/expai/messagebridge/internal/interfaces"
 	"github.com/expai/messagebridge/models"
-	"github.com/expai/messagebridge/storage"
 )
 
 // Worker handles retry logic for failed messages
 type Worker struct {
-	storage       *storage.SQLiteStorage
-	kafkaProducer *kafka.Producer
-	httpClient    *httpclient.Client
+	storage       interfaces.MessageStorage
+	kafkaProducer interfaces.MessageProducer
+	httpClient    interfaces.HTTPSender
 	config        *config.Config
 	running       bool
 	stopCh        chan struct{}
@@ -26,7 +24,7 @@ type Worker struct {
 }
 
 // NewWorker creates a new worker instance
-func NewWorker(cfg *config.Config, storage *storage.SQLiteStorage, kafkaProducer *kafka.Producer, httpClient *httpclient.Client) *Worker {
+func NewWorker(cfg *config.Config, storage interfaces.MessageStorage, kafkaProducer interfaces.MessageProducer, httpClient interfaces.HTTPSender) *Worker {
 	return &Worker{
 		storage:       storage,
 		kafkaProducer: kafkaProducer,

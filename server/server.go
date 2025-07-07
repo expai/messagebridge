@@ -12,27 +12,23 @@ import (
 	"time"
 
 	"github.com/expai/messagebridge/config"
+	"github.com/expai/messagebridge/internal/interfaces"
 	"github.com/expai/messagebridge/models"
 
 	"github.com/gorilla/mux"
 )
-
-// WebhookHandler interface for processing webhooks
-type WebhookHandler interface {
-	ProcessWebhook(msg *models.WebhookMessage) error
-}
 
 // Server represents HTTP server for webhook reception
 type Server struct {
 	server   *http.Server
 	router   *mux.Router
 	config   *config.Config
-	handler  WebhookHandler
+	handler  interfaces.WebhookHandler
 	routeMap map[string]string // path -> queue mapping
 }
 
 // NewServer creates a new HTTP server
-func NewServer(cfg *config.Config, handler WebhookHandler) *Server {
+func NewServer(cfg *config.Config, handler interfaces.WebhookHandler) *Server {
 	router := mux.NewRouter()
 
 	// Build route mapping
@@ -241,4 +237,3 @@ func generateID() (string, error) {
 	}
 	return hex.EncodeToString(bytes), nil
 }
- 

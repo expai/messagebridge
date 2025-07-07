@@ -1,6 +1,6 @@
 [Unit]
 # Описание сервиса
-Description=MessageBridge - Secure Payment Webhook Gateway 
+Description=MessageBridge - Secure Payment Webhook Gateway
 # Ссылка на документацию
 Documentation=https://github.com/expai/messagebridge
 # Запускать после инициализации сети         
@@ -22,7 +22,7 @@ NoNewPrivileges=true
 # Выделяет отдельный /tmp для сервиса (невидим для других процессов)
 PrivateTmp=true
 # Только чтение для всей системы, кроме явно разрешённых путей      
-ProtectSystem=strict             
+ProtectSystem=strict
 # Запрещает доступ к домашним директориям пользователей
 ProtectHome=true
 # Разрешает запись только в эти директории
@@ -58,7 +58,7 @@ KillMode=mixed
 # Сигнал для остановки процесса
 KillSignal=SIGTERM
 # Время ожидания завершения процесса при остановке (сек)
-TimeoutStopSec=30                                             
+TimeoutStopSec=30
 
 # Restart policy
 # Всегда перезапускать при завершении
@@ -98,4 +98,4 @@ LimitNPROC=4096
 
 [Install]
 # Автоматически запускать при загрузке системы (обычный режим для серверов)
-WantedBy=multi-user.target
+WantedBy=multi-user.target 
